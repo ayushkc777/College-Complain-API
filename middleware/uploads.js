@@ -2,15 +2,28 @@ const multer = require("multer");
 const maxSize = 2 * 1024 * 1024; // 2MB for images
 const maxVideoSize = 50 * 1024 * 1024; // 50MB for videos
 const path = require("path");
+const fs = require("fs");
+
+const ensureDir = (dirPath) => {
+  if (!fs.existsSync(dirPath)) {
+    fs.mkdirSync(dirPath, { recursive: true });
+  }
+};
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     if (file.fieldname === "profilePicture") {
-      cb(null, path.join("public", "profile_pictures"));
+      const target = path.join("public", "profile_pictures");
+      ensureDir(target);
+      cb(null, target);
     } else if (file.fieldname === "itemPhoto") {
-      cb(null, path.join("public", "item_photos"));
+      const target = path.join("public", "item_photos");
+      ensureDir(target);
+      cb(null, target);
     } else if (file.fieldname === "itemVideo") {
-      cb(null, path.join("public", "item_videos"));
+      const target = path.join("public", "item_videos");
+      ensureDir(target);
+      cb(null, target);
     } else {
       return cb(new Error("Invalid field name for upload."), false);
     }

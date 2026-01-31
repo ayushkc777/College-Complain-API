@@ -1,6 +1,6 @@
-# Lost & Found API
+# College Complaint API
 
-A simple Lost and Found REST API for mobile and web applications.
+A simple College Complaint REST API for mobile and web applications.
 
 **This project is solely for college project purposes only.**
 
@@ -135,7 +135,122 @@ A simple Lost and Found REST API for mobile and web applications.
 
 ## API Endpoints
 
-**Base URL:** `http://localhost:3000/api/v1`
+**Base URL:** `http://localhost:3000/api/v1` (uses `PORT` from `config/config.env`, defaults to `5000` if not set)
+
+## Flutter Integration (Quick Reference)
+
+**Base URL**
+
+`http://localhost:3000/api/v1`
+
+**Signup (Register)**
+
+- Method: `POST`
+- Endpoint: `/students`
+- Body:
+
+```json
+{
+  "name": "Kiran Rana",
+  "username": "kiranr",
+  "email": "kiran@softwarica.edu.np",
+  "password": "password123",
+  "batchId": "64abc123...",
+  "phoneNumber": "+977-9801234500",
+  "profilePicture": "default-profile.png"
+}
+```
+
+- Success (201):
+
+```json
+{
+  "success": true,
+  "data": {
+    "_id": "64abc123...",
+    "name": "Kiran Rana",
+    "email": "kiran@softwarica.edu.np",
+    "username": "kiranr",
+    "phoneNumber": "+977-9801234500",
+    "batchId": "64abc123...",
+    "profilePicture": "default-profile.png",
+    "createdAt": "2025-12-20T10:00:00.000Z"
+  }
+}
+```
+
+- Error (400/404):
+
+```json
+{
+  "message": "Email already exists"
+}
+```
+
+**Login**
+
+- Method: `POST`
+- Endpoint: `/students/login`
+- Body:
+
+```json
+{
+  "email": "kiran@softwarica.edu.np",
+  "password": "password123"
+}
+```
+
+- Success (200):
+
+```json
+{
+  "success": true,
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "data": {
+    "_id": "64abc123...",
+    "name": "Kiran Rana",
+    "email": "kiran@softwarica.edu.np",
+    "username": "kiranr",
+    "phoneNumber": "+977-9801234500",
+    "batchId": "64abc123...",
+    "profilePicture": "default-profile.png",
+    "createdAt": "2025-12-20T10:00:00.000Z"
+  }
+}
+```
+
+- Error (400/401):
+
+```json
+{
+  "message": "Invalid credentials"
+}
+```
+
+**Token Header Format**
+
+```
+Authorization: Bearer <token>
+```
+
+**Batch Lookup (get batchId)**
+
+- Method: `GET`
+- Endpoint: `/batches`
+- Use: pick `data[i]._id` where `data[i].batchName` matches the batch (e.g., `35A`)
+
+```json
+{
+  "success": true,
+  "count": 4,
+  "data": [
+    { "_id": "65f0...abc", "batchName": "35A", "status": "active" },
+    { "_id": "65f0...def", "batchName": "35B", "status": "active" },
+    { "_id": "65f0...ghi", "batchName": "36A", "status": "active" },
+    { "_id": "65f0...jkl", "batchName": "36B", "status": "active" }
+  ]
+}
+```
 
 ### Authentication
 
@@ -180,6 +295,27 @@ Authorization: Bearer <token>
     "status": "active",
     "createdAt": "2025-12-20T10:00:00.000Z"
   }
+}
+```
+
+**Get All Batches (for batchId lookup):**
+
+```http
+GET /api/v1/batches
+```
+
+**Response:**
+
+```json
+{
+  "success": true,
+  "count": 4,
+  "data": [
+    { "_id": "65f0...abc", "batchName": "35A", "status": "active" },
+    { "_id": "65f0...def", "batchName": "35B", "status": "active" },
+    { "_id": "65f0...ghi", "batchName": "36A", "status": "active" },
+    { "_id": "65f0...jkl", "batchName": "36B", "status": "active" }
+  ]
 }
 ```
 
@@ -238,7 +374,7 @@ Authorization: Bearer <token>
 | DELETE | `/students/:id`    | Delete account         | Yes  |
 | POST   | `/students/upload` | Upload profile picture | No   |
 
-**Register:**
+**Register (Signup):**
 
 ```http
 POST /api/v1/students
@@ -254,6 +390,34 @@ Content-Type: application/json
 }
 ```
 
+**Note:** `batchId` must be a valid MongoDB ObjectId from `GET /api/v1/batches`.
+
+**Success Response (201):**
+
+```json
+{
+  "success": true,
+  "data": {
+    "_id": "64abc123...",
+    "name": "Kiran Rana",
+    "email": "kiran@softwarica.edu.np",
+    "username": "kiranr",
+    "phoneNumber": "+977-9801234500",
+    "batchId": "64abc123...",
+    "profilePicture": "default-profile.png",
+    "createdAt": "2025-12-20T10:00:00.000Z"
+  }
+}
+```
+
+**Error Response (400/404):**
+
+```json
+{
+  "message": "Email already exists"
+}
+```
+
 **Login:**
 
 ```http
@@ -266,12 +430,30 @@ Content-Type: application/json
 }
 ```
 
-**Response:**
+**Success Response (200):**
 
 ```json
 {
   "success": true,
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "data": {
+    "_id": "64abc123...",
+    "name": "Kiran Rana",
+    "email": "kiran@softwarica.edu.np",
+    "username": "kiranr",
+    "phoneNumber": "+977-9801234500",
+    "batchId": "64abc123...",
+    "profilePicture": "default-profile.png",
+    "createdAt": "2025-12-20T10:00:00.000Z"
+  }
+}
+```
+
+**Error Response (400/401):**
+
+```json
+{
+  "message": "Invalid credentials"
 }
 ```
 
@@ -402,7 +584,7 @@ npm install
 # Create config/config.env with:
 # NODE_ENV=development
 # PORT=3000
-# LOCAL_DATABASE_URI=mongodb://127.0.0.1:27017/lost_n_found
+# LOCAL_DATABASE_URI=mongodb://127.0.0.1:27017/college_complaint
 # JWT_SECRET=your_secret_key
 # JWT_EXPIRE=30d
 
@@ -438,7 +620,7 @@ All seeded accounts use password: `password123`
 
 ## Response Format
 
-**Success:**
+**Success (most endpoints):**
 
 ```json
 {
@@ -447,7 +629,25 @@ All seeded accounts use password: `password123`
 }
 ```
 
-**Error:**
+**Success (login):**
+
+```json
+{
+  "success": true,
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "data": { ... }
+}
+```
+
+**Error (manual validation or auth):**
+
+```json
+{
+  "message": "Error description"
+}
+```
+
+**Error (middleware/validation):**
 
 ```json
 {

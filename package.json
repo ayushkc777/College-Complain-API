@@ -1,7 +1,7 @@
 {
-  "name": "lost_n_found_api",
+  "name": "complain_college_api",
   "version": "1.0.0",
-  "description": "Lost and Found API for Students",
+  "description": "College Complaint API for Students",
   "license": "ISC",
   "author": "Kiran Rana",
   "type": "commonjs",

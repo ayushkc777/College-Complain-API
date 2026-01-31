@@ -11,12 +11,102 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 const errorHandler = require("./middleware/errorHandler");
 const app = express();
+const Batch = require("./models/batch_model");
+const Category = require("./models/category_model");
+const Student = require("./models/student_model");
+const Item = require("./models/items_model");
 
 // Load environment variables
 dotenv.config({ path: "./config/config.env" });
 
 // Connect to the database
 connectDB();
+
+const seedDefaults = async () => {
+  const batchCount = await Batch.countDocuments();
+  if (batchCount === 0) {
+    await Batch.insertMany([
+      { batchName: "35A", status: "active" },
+      { batchName: "35B", status: "active" },
+      { batchName: "36A", status: "active" },
+      { batchName: "36B", status: "active" },
+    ]);
+  }
+
+  const categoryCount = await Category.countDocuments();
+  if (categoryCount === 0) {
+    await Category.insertMany([
+      { name: "Academics", description: "Classes, exams, schedules" },
+      { name: "Facilities", description: "Infrastructure and maintenance" },
+      { name: "Harassment", description: "Safety and conduct issues" },
+      { name: "Other", description: "Miscellaneous complaints" },
+    ]);
+  }
+
+  const studentCount = await Student.countDocuments();
+  let student = null;
+  if (studentCount === 0) {
+    const batch = await Batch.findOne();
+    student = await Student.create({
+      name: "Demo Student",
+      email: "demo@softwarica.edu",
+      username: "demo_student",
+      password: "password123",
+      phoneNumber: "9800000000",
+      batchId: batch?._id,
+      profilePicture: "default-profile.png",
+    });
+  } else {
+    student = await Student.findOne();
+  }
+
+  const itemCount = await Item.countDocuments();
+  if (itemCount === 0 && student) {
+    const categories = await Category.find();
+    const categoryId = categories[0]?._id;
+    if (categoryId) {
+      await Item.insertMany([
+        {
+          itemName: "Wi-Fi outage in Block A",
+          description: "Network down since morning.",
+          type: "lost",
+          category: categoryId,
+          location: "Block A, Library",
+          media: "seed.jpg",
+          mediaType: "photo",
+          reportedBy: student._id,
+          status: "available",
+        },
+        {
+          itemName: "Cafeteria hygiene issue",
+          description: "Cleanliness concerns in cafeteria.",
+          type: "found",
+          category: categoryId,
+          location: "Cafeteria",
+          media: "seed.jpg",
+          mediaType: "photo",
+          reportedBy: student._id,
+          status: "available",
+        },
+        {
+          itemName: "Class schedule conflict",
+          description: "Two classes scheduled at same time.",
+          type: "lost",
+          category: categoryId,
+          location: "Block C, Office",
+          media: "seed.jpg",
+          mediaType: "photo",
+          reportedBy: student._id,
+          status: "available",
+        },
+      ]);
+    }
+  }
+};
+
+seedDefaults().catch((err) => {
+  console.error("Seed error:", err.message);
+});
 
 // Rate limiting
 const limiter = rateLimit({

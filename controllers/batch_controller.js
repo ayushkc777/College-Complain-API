@@ -31,7 +31,16 @@ exports.createBatch = asyncHandler(async (req, res) => {
 // @access  Private (Admin)
 
 exports.getAllBatches = asyncHandler(async (req, res) => {
-  const batches = await Batch.find();
+  let batches = await Batch.find();
+
+  if (batches.length === 0) {
+    const defaultBatches = ["35A", "35B", "36A", "36B"].map((batchName) => ({
+      batchName,
+      status: "active",
+    }));
+
+    batches = await Batch.insertMany(defaultBatches);
+  }
 
   res.status(200).json({
     success: true,
